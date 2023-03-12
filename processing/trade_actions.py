@@ -15,8 +15,7 @@ def late_enter_buy(table, day):
     if table['direction'][day] == 1 \
             and table['close'][day] > table['ma3x3_day'][day] \
             and table['close'][day - 1] <= table['ma3x3_day'][day - 1] \
-            and table['close'][day] > table['ma_week_shift'][day]:\
-            # and table['close'][day] < table['close'][day - 7]:
+            and table['close'][day] > table['ma_week_shift'][day]:
         return True
     else:
         return False
@@ -36,8 +35,7 @@ def late_enter_sell(table, day):
     if table['direction'][day] == 0 \
             and table['close'][day] < table['ma3x3_day'][day] \
             and table['close'][day - 1] >= table['ma3x3_day'][day - 1] \
-            and table['close'][day] < table['ma_week_shift'][day]:\
-            # and table['close'][day] > table['close'][day - 7]:
+            and table['close'][day] < table['ma_week_shift'][day]:
         return True
     else:
         return False
