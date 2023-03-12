@@ -20,7 +20,7 @@ file = './Data/ES.csv'
 # file = './Data/BAC.csv'
 # file = './Data/AAPL.csv'
 
-data = ProcessingDate(file, crypto=False, week_ma_len=3, week_ma_shift=3)
+data = ProcessingData(file, crypto=False, week_ma_len=3, week_ma_shift=3)
 
 buy_results = processing_buy_trades(
     data.table,

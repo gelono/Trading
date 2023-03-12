@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 
-class ProcessingDate:
+class ProcessingData:
     COLUMNS = ['date', 'close', 'open', 'high', 'min', 'vol', 'change']
     DROP_COL = ['vol', 'change']
     PRICES = ['close', 'open', 'high', 'min']
