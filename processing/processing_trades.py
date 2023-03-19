@@ -26,24 +26,21 @@ def processing_buy_trades(table, table_week, delay_days, momentum, atr: int, koe
                 atr_avg.append((trade_actions.high_list[day - atr_ind] - trade_actions.min_list[day - atr_ind]) /
                                trade_actions.min_list[day - atr_ind])
             stop_loss = numpy.mean(atr_avg)
-            is_open_trade, trade_ind, open_price_buy, stop_price_buy = trade_actions.avg_enter_buy(results,
-                            trade_actions.close_list, trade_actions.min_list, date_of_trade, trade_actions.date_list,
-                            trade_actions.direction_list, trade_category, day, avg_price_days, stop_loss, koef)
+            is_open_trade, trade_ind, open_price_buy, stop_price_buy = trade_actions.avg_enter_buy(
+                results, date_of_trade, trade_category, day, avg_price_days, stop_loss, koef)
 
             trade_ind += 1
             delay = False
             while is_open_trade:
                 if delay is False:
-                    is_open_trade, trade_ind, delay = trade_actions.processing_buy_delay(trade_ind, open_price_buy,
-                        stop_price_buy, trade_actions.min_list, date_of_trade, trade_actions.date_list, trade_category,
-                        trade_actions.direction_list, trade_actions.close_list, results, delay_days)
+                    is_open_trade, trade_ind, delay = trade_actions.processing_buy_delay(
+                        trade_ind, open_price_buy, stop_price_buy, date_of_trade, trade_category, results, delay_days)
                     if is_open_trade and trade_actions.close_list[trade_ind - 1] > open_price_buy:
                         stop_price_buy = open_price_buy
 
                 if is_open_trade:
-                    is_open_trade, trade_ind = trade_actions.processing_buy_after_delay(trade_ind, open_price_buy,
-                        stop_price_buy, trade_actions.min_list, date_of_trade, trade_actions.date_list, trade_category,
-                        trade_actions.direction_list, trade_actions.close_list, results, momentum)
+                    is_open_trade, trade_ind = trade_actions.processing_buy_after_delay(
+                        trade_ind, open_price_buy, stop_price_buy, date_of_trade, trade_category, results, momentum)
 
             day = trade_ind
         else:
@@ -75,23 +72,20 @@ def processing_sell_trades(table, table_week, delay_days, momentum, atr: int, ko
                                trade_actions.min_list[day - atr_ind])
             stop_loss = numpy.mean(atr_avg)
 
-            is_open_trade, trade_ind, open_price_sell, stop_price_sell = trade_actions.avg_enter_sell(results,
-                            trade_actions.close_list, trade_actions.min_list, date_of_trade, trade_actions.date_list,
-                            trade_actions.direction_list, trade_category, day, avg_price_days, stop_loss, koef)
+            is_open_trade, trade_ind, open_price_sell, stop_price_sell = trade_actions.avg_enter_sell(
+                results, date_of_trade, trade_category, day, avg_price_days, stop_loss, koef)
             trade_ind += 1
             delay = False
             while is_open_trade:
                 if delay is False:
-                    is_open_trade, trade_ind, delay = trade_actions.processing_sell_delay(trade_ind, open_price_sell,
-                        stop_price_sell, trade_actions.high_list, date_of_trade, trade_actions.date_list, trade_category,
-                        trade_actions.direction_list, trade_actions.close_list, results, delay_days)
+                    is_open_trade, trade_ind, delay = trade_actions.processing_sell_delay(
+                        trade_ind, open_price_sell, stop_price_sell, date_of_trade, trade_category, results, delay_days)
                     if is_open_trade and trade_actions.close_list[trade_ind - 1] < open_price_sell:
                         stop_price_sell = open_price_sell
 
                 if is_open_trade:
-                    is_open_trade, trade_ind = trade_actions.processing_sell_after_delay(trade_ind, open_price_sell,
-                        stop_price_sell, trade_actions.high_list, date_of_trade, trade_actions.date_list, trade_category,
-                        trade_actions.direction_list, trade_actions.close_list, results, momentum)
+                    is_open_trade, trade_ind = trade_actions.processing_sell_after_delay(
+                        trade_ind, open_price_sell, stop_price_sell, date_of_trade, trade_category, results, momentum)
 
             day = trade_ind
         else:

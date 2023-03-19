@@ -55,92 +55,92 @@ class TradeActions:
         else:
             return False
 
-    @staticmethod
-    def avg_enter_buy(results, close_list, min_list, date_of_trade, date_list, direction_list, trade_category, day, avg_price_days, stop_loss, koef):
-        price_list = [close_list[day]]
+    def avg_enter_buy(self, results, date_of_trade, trade_category, day, avg_price_days, stop_loss, koef):
+        price_list = [self.close_list[day]]
         open_price_buy = np.mean(price_list)
         stop_price_buy = open_price_buy * (1-(stop_loss*koef))
         count = 1
         for i in range(day + 1, day + avg_price_days):
             try:
-                if min_list[i] <= stop_price_buy:
-                    result = (date_of_trade, (((stop_price_buy - open_price_buy) / open_price_buy) * 100) * (count / avg_price_days),
-                              date_list[i], stop_price_buy, 'Stop-loss', trade_category)
+                if self.min_list[i] <= stop_price_buy:
+                    result = (date_of_trade, (((stop_price_buy - open_price_buy) / open_price_buy) * 100) *
+                              (count / avg_price_days), self.date_list[i], stop_price_buy, 'Stop-loss', trade_category)
                     results.append(result)
                     return False, i, open_price_buy, stop_price_buy
-                elif direction_list[i] == 0:
-                    result = (date_of_trade, (((close_list[i] - open_price_buy) / open_price_buy) * 100) * (count / avg_price_days),
-                              date_list[i], stop_price_buy, 'Direction has changed', trade_category)
+                elif self.direction_list[i] == 0:
+                    result = (date_of_trade, (((self.close_list[i] - open_price_buy) / open_price_buy) * 100)
+                              * (count / avg_price_days), self.date_list[i], stop_price_buy, 'Direction has changed',
+                              trade_category)
                     results.append(result)
                     return False, i, open_price_buy, stop_price_buy
                 else:
-                    price_list.append(close_list[i])
+                    price_list.append(self.close_list[i])
                     open_price_buy = np.mean(price_list)
                     stop_price_buy = open_price_buy * (1-(stop_loss*koef))
                     count += 1
                     day = i
             except IndexError:
-                result = (date_of_trade, (((close_list[-1] - open_price_buy) / open_price_buy) * 100) * (count / avg_price_days),
-                          date_list[-1], stop_price_buy, 'End of the data', trade_category)
+                result = (date_of_trade, (((self.close_list[-1] - open_price_buy) / open_price_buy) * 100) *
+                          (count / avg_price_days), self.date_list[-1], stop_price_buy, 'End of the data',
+                          trade_category)
                 results.append(result)
                 return False, i, open_price_buy, stop_price_buy
 
         return True, day, open_price_buy, stop_price_buy
 
-    @staticmethod
-    def avg_enter_sell(results, close_list, high_list, date_of_trade, date_list, direction_list, trade_category, day, avg_price_days,
-                       stop_loss, koef):
-        price_list = [close_list[day]]
+    def avg_enter_sell(self, results, date_of_trade, trade_category, day, avg_price_days, stop_loss, koef):
+        price_list = [self.close_list[day]]
         open_price_sell = np.mean(price_list)
         stop_price_sell = open_price_sell * (1 + (stop_loss * koef))
         count = 1
         for i in range(day + 1, day + avg_price_days):
             try:
-                if high_list[i] >= stop_price_sell:
+                if self.high_list[i] >= stop_price_sell:
                     result = (
-                    date_of_trade, (((open_price_sell - stop_price_sell) / open_price_sell) * 100) * (count / avg_price_days),
-                    date_list[i], stop_price_sell, 'Stop-loss', trade_category)
+                        date_of_trade, (((open_price_sell - stop_price_sell) / open_price_sell) * 100) *
+                        (count / avg_price_days), self.date_list[i], stop_price_sell, 'Stop-loss', trade_category
+                    )
                     results.append(result)
                     return False, i, open_price_sell, stop_price_sell
-                elif direction_list[i] == 1:
-                    result = (date_of_trade, (((open_price_sell - close_list[i]) / open_price_sell) * 100) * (count / avg_price_days),
-                              date_list[i], stop_price_sell, 'Direction has changed', trade_category)
+                elif self.direction_list[i] == 1:
+                    result = (date_of_trade, (((open_price_sell - self.close_list[i]) / open_price_sell) * 100)
+                              * (count / avg_price_days), self.date_list[i], stop_price_sell, 'Direction has changed',
+                              trade_category)
                     results.append(result)
                     return False, i, open_price_sell, stop_price_sell
                 else:
-                    price_list.append(close_list[i])
+                    price_list.append(self.close_list[i])
                     open_price_sell = np.mean(price_list)
                     stop_price_sell = open_price_sell * (1 + (stop_loss * koef))
                     count += 1
                     day = i
             except IndexError:
-                result = (date_of_trade, (((open_price_sell - close_list[-1]) / open_price_sell) * 100) * (count / avg_price_days),
-                          date_list[-1], stop_price_sell, 'End of the data', trade_category)
+                result = (date_of_trade, (((open_price_sell - self.close_list[-1]) / open_price_sell) * 100) *
+                          (count / avg_price_days), self.date_list[-1], stop_price_sell, 'End of the data',
+                          trade_category)
                 results.append(result)
                 return False, i, open_price_sell, stop_price_sell
 
         return True, day, open_price_sell, stop_price_sell
 
-    def processing_buy_delay(self, trade_ind, open_price_buy, stop_price_buy, min_list, date_of_trade, date_list,
-                              trade_category, direction_list, close_list, results, delay_days):
+    def processing_buy_delay(self, trade_ind, open_price_buy, stop_price_buy, date_of_trade, trade_category,
+                             results, delay_days):
         is_open_trade = True
         for i in range(trade_ind, trade_ind + delay_days):
             try:
-                if min_list[i] <= stop_price_buy:
+                if self.min_list[i] <= stop_price_buy:
                     result = (
                         date_of_trade, ((stop_price_buy - open_price_buy) / open_price_buy) * 100,
-                        date_list[i],
-                        stop_price_buy, 'Stop-loss', trade_category
+                        self.date_list[i], stop_price_buy, 'Stop-loss', trade_category
                     )
                     is_open_trade = False
                     results.append(result)
                     trade_ind = i + 1
                     break
-                elif direction_list[i] == 0:
+                elif self.direction_list[i] == 0:
                     result = (
-                        date_of_trade, ((close_list[i] - open_price_buy) / open_price_buy) * 100,
-                        date_list[i],
-                        close_list[i], 'Direction has changed', trade_category
+                        date_of_trade, ((self.close_list[i] - open_price_buy) / open_price_buy) * 100,
+                        self.date_list[i], self.close_list[i], 'Direction has changed', trade_category
                     )
                     is_open_trade = False
                     results.append(result)
@@ -149,10 +149,9 @@ class TradeActions:
                 trade_ind = i + 1
             except IndexError:
                 result = (
-                    date_of_trade,
-                    ((close_list[self.table.shape[0] - 1] - open_price_buy) / open_price_buy) * 100,
-                    date_list[self.table.shape[0] - 1], close_list[self.table.shape[0] - 1], 'End of the data',
-                    trade_category
+                    date_of_trade, ((self.close_list[self.table.shape[0] - 1] - open_price_buy) / open_price_buy) * 100,
+                    self.date_list[self.table.shape[0] - 1], self.close_list[self.table.shape[0] - 1],
+                    'End of the data', trade_category
                 )
                 is_open_trade = False
                 results.append(result)
@@ -162,26 +161,24 @@ class TradeActions:
         delay = True
         return is_open_trade, trade_ind, delay
 
-    def processing_sell_delay(self, trade_ind, open_price_sell, stop_price_sell, high_list, date_of_trade, date_list,
-                         trade_category, direction_list, close_list, results, delay_days):
+    def processing_sell_delay(self, trade_ind, open_price_sell, stop_price_sell, date_of_trade, trade_category,
+                              results, delay_days):
         is_open_trade = True
         for i in range(trade_ind, trade_ind + delay_days):
             try:
-                if high_list[i] >= stop_price_sell:
+                if self.high_list[i] >= stop_price_sell:
                     result = (
                         date_of_trade, ((open_price_sell - stop_price_sell) / open_price_sell) * 100,
-                        date_list[i],
-                        stop_price_sell, 'Stop-loss', trade_category
+                        self.date_list[i], stop_price_sell, 'Stop-loss', trade_category
                     )
                     is_open_trade = False
                     results.append(result)
                     trade_ind = i + 1
                     break
-                elif direction_list[i] == 1:
+                elif self.direction_list[i] == 1:
                     result = (
-                        date_of_trade, ((open_price_sell - close_list[i]) / open_price_sell) * 100,
-                        date_list[i],
-                        close_list[i], 'Direction has changed', trade_category
+                        date_of_trade, ((open_price_sell - self.close_list[i]) / open_price_sell) * 100,
+                        self.date_list[i], self.close_list[i], 'Direction has changed', trade_category
                     )
                     is_open_trade = False
                     results.append(result)
@@ -190,10 +187,9 @@ class TradeActions:
                 trade_ind = i + 1
             except IndexError:
                 result = (
-                    date_of_trade,
-                    ((open_price_sell - close_list[self.table.shape[0] - 1]) / open_price_sell) * 100,
-                    date_list[self.table.shape[0] - 1], close_list[self.table.shape[0] - 1], 'End of the data',
-                    trade_category
+                    date_of_trade, ((open_price_sell - self.close_list[self.table.shape[0] - 1]) / open_price_sell) *
+                    100, self.date_list[self.table.shape[0] - 1], self.close_list[self.table.shape[0] - 1],
+                    'End of the data', trade_category
                 )
                 is_open_trade = False
                 results.append(result)
@@ -203,42 +199,41 @@ class TradeActions:
         delay = True
         return is_open_trade, trade_ind, delay
 
-    def processing_buy_after_delay(self, trade_ind, open_price_buy, stop_price_buy, min_list, date_of_trade, date_list,
-                              trade_category, direction_list, close_list, results, momentum):
+    def processing_buy_after_delay(self, trade_ind, open_price_buy, stop_price_buy, date_of_trade, trade_category,
+                                   results, momentum):
         is_open_trade = True
         try:
-            if min_list[trade_ind] <= stop_price_buy:
+            if self.min_list[trade_ind] <= stop_price_buy:
                 result = (
                     date_of_trade, ((stop_price_buy - open_price_buy) / open_price_buy) * 100,
-                    date_list[trade_ind],
+                    self.date_list[trade_ind],
                     stop_price_buy, 'Stop-loss', trade_category
                 )
                 is_open_trade = False
                 results.append(result)
                 trade_ind += 1
-            elif direction_list[trade_ind] == 0:
+            elif self.direction_list[trade_ind] == 0:
                 result = (
-                    date_of_trade, ((close_list[trade_ind] - open_price_buy) / open_price_buy) * 100,
-                    date_list[trade_ind], close_list[trade_ind], 'Direction has changed', trade_category
+                    date_of_trade, ((self.close_list[trade_ind] - open_price_buy) / open_price_buy) * 100,
+                    self.date_list[trade_ind], self.close_list[trade_ind], 'Direction has changed', trade_category
                 )
                 is_open_trade = False
                 results.append(result)
                 trade_ind += 1
             else:
-                mom_3 = close_list[trade_ind] - close_list[trade_ind - momentum]
+                mom_3 = self.close_list[trade_ind] - self.close_list[trade_ind - momentum]
                 if mom_3 < 0:
                     result = (
-                        date_of_trade, ((close_list[trade_ind] - open_price_buy) / open_price_buy) * 100,
-                        date_list[trade_ind], close_list[trade_ind], 'Exit by MOM-3', trade_category
+                        date_of_trade, ((self.close_list[trade_ind] - open_price_buy) / open_price_buy) * 100,
+                        self.date_list[trade_ind], self.close_list[trade_ind], 'Exit by MOM-3', trade_category
                     )
                     is_open_trade = False
                     results.append(result)
                 trade_ind += 1
         except IndexError:
             result = (
-                date_of_trade,
-                ((close_list[self.table.shape[0] - 1] - open_price_buy) / open_price_buy) * 100,
-                date_list[self.table.shape[0] - 1], close_list[self.table.shape[0] - 1], 'End of the data',
+                date_of_trade, ((self.close_list[self.table.shape[0] - 1] - open_price_buy) / open_price_buy) * 100,
+                self.date_list[self.table.shape[0] - 1], self.close_list[self.table.shape[0] - 1], 'End of the data',
                 trade_category
             )
             is_open_trade = False
@@ -247,42 +242,40 @@ class TradeActions:
 
         return is_open_trade, trade_ind
 
-    def processing_sell_after_delay(self, trade_ind, open_price_sell, stop_price_sell, high_list, date_of_trade, date_list,
-                         trade_category, direction_list, close_list, results, momentum):
+    def processing_sell_after_delay(self, trade_ind, open_price_sell, stop_price_sell, date_of_trade, trade_category,
+                                    results, momentum):
         is_open_trade = True
         try:
-            if high_list[trade_ind] >= stop_price_sell:
+            if self.high_list[trade_ind] >= stop_price_sell:
                 result = (
                     date_of_trade, ((open_price_sell - stop_price_sell) / open_price_sell) * 100,
-                    date_list[trade_ind],
-                    stop_price_sell, 'Stop-loss', trade_category
+                    self.date_list[trade_ind], stop_price_sell, 'Stop-loss', trade_category
                 )
                 is_open_trade = False
                 results.append(result)
                 trade_ind += 1
-            elif direction_list[trade_ind] == 1:
+            elif self.direction_list[trade_ind] == 1:
                 result = (
-                    date_of_trade, ((open_price_sell - close_list[trade_ind]) / open_price_sell) * 100,
-                    date_list[trade_ind], close_list[trade_ind], 'Direction has changed', trade_category
+                    date_of_trade, ((open_price_sell - self.close_list[trade_ind]) / open_price_sell) * 100,
+                    self.date_list[trade_ind], self.close_list[trade_ind], 'Direction has changed', trade_category
                 )
                 is_open_trade = False
                 results.append(result)
                 trade_ind += 1
             else:
-                mom_3 = close_list[trade_ind] - close_list[trade_ind - momentum]
+                mom_3 = self.close_list[trade_ind] - self.close_list[trade_ind - momentum]
                 if mom_3 > 0:
                     result = (
-                        date_of_trade, ((open_price_sell - close_list[trade_ind]) / open_price_sell) * 100,
-                        date_list[trade_ind], close_list[trade_ind], 'Exit by MOM-3', trade_category
+                        date_of_trade, ((open_price_sell - self.close_list[trade_ind]) / open_price_sell) * 100,
+                        self.date_list[trade_ind], self.close_list[trade_ind], 'Exit by MOM-3', trade_category
                     )
                     is_open_trade = False
                     results.append(result)
                 trade_ind += 1
         except IndexError:
             result = (
-                date_of_trade,
-                ((open_price_sell - close_list[self.table.shape[0] - 1]) / open_price_sell) * 100,
-                date_list[self.table.shape[0] - 1], close_list[self.table.shape[0] - 1], 'End of the data',
+                date_of_trade, ((open_price_sell - self.close_list[self.table.shape[0] - 1]) / open_price_sell) * 100,
+                self.date_list[self.table.shape[0] - 1], self.close_list[self.table.shape[0] - 1], 'End of the data',
                 trade_category
             )
             is_open_trade = False
