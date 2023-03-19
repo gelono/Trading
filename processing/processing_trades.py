@@ -47,83 +47,54 @@ def processing_buy_trades(table, table_week, delay_days, momentum, atr: int, koe
             delay = False
             while is_open_trade:
                 if delay is False:
-                    for i in range(trade_ind, trade_ind + delay_days):
-                        try:
-                            if min_list[i] <= stop_price_buy:
-                                result = (
-                                    date_of_trade, ((stop_price_buy - open_price_buy) / open_price_buy) * 100,
-                                    date_list[i],
-                                    stop_price_buy, 'Stop-loss', trade_category
-                                )
-                                is_open_trade = False
-                                results.append(result)
-                                trade_ind = i + 1
-                                break
-                            elif direction_list[i] == 0:
-                                result = (
-                                    date_of_trade, ((close_list[i] - open_price_buy) / open_price_buy) * 100,
-                                    date_list[i],
-                                    close_list[i], 'Direction has changed', trade_category
-                                )
-                                is_open_trade = False
-                                results.append(result)
-                                trade_ind = i + 1
-                                break
-                            trade_ind = i + 1
-                        except IndexError:
-                            result = (
-                                date_of_trade,
-                                ((close_list[table.shape[0] - 1] - open_price_buy) / open_price_buy) * 100,
-                                date_list[table.shape[0] - 1], close_list[table.shape[0] - 1], 'End of the data',
-                                trade_category
-                            )
-                            is_open_trade = False
-                            results.append(result)
-                            trade_ind = i + 1
-                            break
-                    delay = True
+                    is_open_trade, trade_ind, delay = trade_actions.processing_buy_delay(trade_ind, open_price_buy,
+                        stop_price_buy, min_list, date_of_trade, date_list, trade_category, direction_list, close_list,
+                        results, delay_days)
                     if is_open_trade and close_list[trade_ind - 1] > open_price_buy:
                         stop_price_buy = open_price_buy
 
                 if is_open_trade:
-                    try:
-                        if min_list[trade_ind] <= stop_price_buy:
-                            result = (
-                                date_of_trade, ((stop_price_buy - open_price_buy) / open_price_buy) * 100,
-                                date_list[trade_ind],
-                                stop_price_buy, 'Stop-loss', trade_category
-                            )
-                            is_open_trade = False
-                            results.append(result)
-                            trade_ind += 1
-                        elif direction_list[trade_ind] == 0:
-                            result = (
-                                date_of_trade, ((close_list[trade_ind] - open_price_buy) / open_price_buy) * 100,
-                                date_list[trade_ind], close_list[trade_ind], 'Direction has changed', trade_category
-                            )
-                            is_open_trade = False
-                            results.append(result)
-                            trade_ind += 1
-                        else:
-                            mom_3 = close_list[trade_ind] - close_list[trade_ind - momentum]
-                            if mom_3 < 0:
-                                result = (
-                                    date_of_trade, ((close_list[trade_ind] - open_price_buy) / open_price_buy) * 100,
-                                    date_list[trade_ind], close_list[trade_ind], 'Exit by MOM-3', trade_category
-                                )
-                                is_open_trade = False
-                                results.append(result)
-                            trade_ind += 1
-                    except IndexError:
-                        result = (
-                            date_of_trade,
-                            ((close_list[table.shape[0] - 1] - open_price_buy) / open_price_buy) * 100,
-                            date_list[table.shape[0] - 1], close_list[table.shape[0] - 1], 'End of the data',
-                            trade_category
-                        )
-                        is_open_trade = False
-                        results.append(result)
-                        trade_ind += 1
+                    is_open_trade, trade_ind = trade_actions.processing_buy_after_delay(trade_ind, open_price_buy,
+                                                stop_price_buy, min_list, date_of_trade, date_list, trade_category,
+                                                direction_list, close_list, results, momentum)
+                    # try:
+                    #     if min_list[trade_ind] <= stop_price_buy:
+                    #         result = (
+                    #             date_of_trade, ((stop_price_buy - open_price_buy) / open_price_buy) * 100,
+                    #             date_list[trade_ind],
+                    #             stop_price_buy, 'Stop-loss', trade_category
+                    #         )
+                    #         is_open_trade = False
+                    #         results.append(result)
+                    #         trade_ind += 1
+                    #     elif direction_list[trade_ind] == 0:
+                    #         result = (
+                    #             date_of_trade, ((close_list[trade_ind] - open_price_buy) / open_price_buy) * 100,
+                    #             date_list[trade_ind], close_list[trade_ind], 'Direction has changed', trade_category
+                    #         )
+                    #         is_open_trade = False
+                    #         results.append(result)
+                    #         trade_ind += 1
+                    #     else:
+                    #         mom_3 = close_list[trade_ind] - close_list[trade_ind - momentum]
+                    #         if mom_3 < 0:
+                    #             result = (
+                    #                 date_of_trade, ((close_list[trade_ind] - open_price_buy) / open_price_buy) * 100,
+                    #                 date_list[trade_ind], close_list[trade_ind], 'Exit by MOM-3', trade_category
+                    #             )
+                    #             is_open_trade = False
+                    #             results.append(result)
+                    #         trade_ind += 1
+                    # except IndexError:
+                    #     result = (
+                    #         date_of_trade,
+                    #         ((close_list[table.shape[0] - 1] - open_price_buy) / open_price_buy) * 100,
+                    #         date_list[table.shape[0] - 1], close_list[table.shape[0] - 1], 'End of the data',
+                    #         trade_category
+                    #     )
+                    #     is_open_trade = False
+                    #     results.append(result)
+                    #     trade_ind += 1
             day = trade_ind
         else:
             day += 1
@@ -177,83 +148,54 @@ def processing_sell_trades(table, table_week, delay_days, momentum, atr: int, ko
             delay = False
             while is_open_trade:
                 if delay is False:
-                    for i in range(trade_ind, trade_ind + delay_days):
-                        try:
-                            if high_list[i] >= stop_price_sell:
-                                result = (
-                                    date_of_trade, ((open_price_sell - stop_price_sell) / open_price_sell) * 100,
-                                    date_list[i],
-                                    stop_price_sell, 'Stop-loss', trade_category
-                                )
-                                is_open_trade = False
-                                results.append(result)
-                                trade_ind = i + 1
-                                break
-                            elif direction_list[i] == 1:
-                                result = (
-                                    date_of_trade, ((open_price_sell - close_list[i]) / open_price_sell) * 100,
-                                    date_list[i],
-                                    close_list[i], 'Direction has changed', trade_category
-                                )
-                                is_open_trade = False
-                                results.append(result)
-                                trade_ind = i + 1
-                                break
-                            trade_ind = i + 1
-                        except IndexError:
-                            result = (
-                                date_of_trade,
-                                ((open_price_sell - close_list[table.shape[0] - 1]) / open_price_sell) * 100,
-                                date_list[table.shape[0] - 1], close_list[table.shape[0] - 1], 'End of the data',
-                                trade_category
-                            )
-                            is_open_trade = False
-                            results.append(result)
-                            trade_ind = i + 1
-                            break
-                    delay = True
+                    is_open_trade, trade_ind, delay = trade_actions.processing_sell_delay(trade_ind, open_price_sell,
+                        stop_price_sell, high_list, date_of_trade, date_list, trade_category, direction_list,
+                        close_list, results, delay_days)
                     if is_open_trade and close_list[trade_ind - 1] < open_price_sell:
                         stop_price_sell = open_price_sell
 
                 if is_open_trade:
-                    try:
-                        if high_list[trade_ind] >= stop_price_sell:
-                            result = (
-                                date_of_trade, ((open_price_sell - stop_price_sell) / open_price_sell) * 100,
-                                date_list[trade_ind],
-                                stop_price_sell, 'Stop-loss', trade_category
-                            )
-                            is_open_trade = False
-                            results.append(result)
-                            trade_ind += 1
-                        elif direction_list[trade_ind] == 1:
-                            result = (
-                                date_of_trade, ((open_price_sell - close_list[trade_ind]) / open_price_sell) * 100,
-                                date_list[trade_ind], close_list[trade_ind], 'Direction has changed', trade_category
-                            )
-                            is_open_trade = False
-                            results.append(result)
-                            trade_ind += 1
-                        else:
-                            mom_3 = close_list[trade_ind] - close_list[trade_ind - momentum]
-                            if mom_3 > 0:
-                                result = (
-                                    date_of_trade, ((open_price_sell - close_list[trade_ind]) / open_price_sell) * 100,
-                                    date_list[trade_ind], close_list[trade_ind], 'Exit by MOM-3', trade_category
-                                )
-                                is_open_trade = False
-                                results.append(result)
-                            trade_ind += 1
-                    except IndexError:
-                        result = (
-                            date_of_trade,
-                            ((open_price_sell - close_list[table.shape[0] - 1]) / open_price_sell) * 100,
-                            date_list[table.shape[0] - 1], close_list[table.shape[0] - 1], 'End of the data',
-                            trade_category
-                        )
-                        is_open_trade = False
-                        results.append(result)
-                        trade_ind += 1
+                    is_open_trade, trade_ind = trade_actions.processing_sell_after_delay(trade_ind, open_price_sell,
+                                                stop_price_sell, high_list, date_of_trade, date_list, trade_category,
+                                                direction_list, close_list, results, momentum)
+                    # try:
+                    #     if high_list[trade_ind] >= stop_price_sell:
+                    #         result = (
+                    #             date_of_trade, ((open_price_sell - stop_price_sell) / open_price_sell) * 100,
+                    #             date_list[trade_ind],
+                    #             stop_price_sell, 'Stop-loss', trade_category
+                    #         )
+                    #         is_open_trade = False
+                    #         results.append(result)
+                    #         trade_ind += 1
+                    #     elif direction_list[trade_ind] == 1:
+                    #         result = (
+                    #             date_of_trade, ((open_price_sell - close_list[trade_ind]) / open_price_sell) * 100,
+                    #             date_list[trade_ind], close_list[trade_ind], 'Direction has changed', trade_category
+                    #         )
+                    #         is_open_trade = False
+                    #         results.append(result)
+                    #         trade_ind += 1
+                    #     else:
+                    #         mom_3 = close_list[trade_ind] - close_list[trade_ind - momentum]
+                    #         if mom_3 > 0:
+                    #             result = (
+                    #                 date_of_trade, ((open_price_sell - close_list[trade_ind]) / open_price_sell) * 100,
+                    #                 date_list[trade_ind], close_list[trade_ind], 'Exit by MOM-3', trade_category
+                    #             )
+                    #             is_open_trade = False
+                    #             results.append(result)
+                    #         trade_ind += 1
+                    # except IndexError:
+                    #     result = (
+                    #         date_of_trade,
+                    #         ((open_price_sell - close_list[table.shape[0] - 1]) / open_price_sell) * 100,
+                    #         date_list[table.shape[0] - 1], close_list[table.shape[0] - 1], 'End of the data',
+                    #         trade_category
+                    #     )
+                    #     is_open_trade = False
+                    #     results.append(result)
+                    #     trade_ind += 1
             day = trade_ind
         else:
             day += 1

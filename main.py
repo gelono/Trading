@@ -82,7 +82,7 @@ for result, risk in zip(lst_sell, list_sell_risk):
 print(f'high_risk_total_sell: {sum(high_risk_total_sell)} | trades: {len(high_risk_total_sell)}')
 print(f'low_risk_total_sell: {sum(low_risk_total_sell)} | trades: {len(low_risk_total_sell)}')
 
-pprint(buy_results)
+# pprint(buy_results)
 # print('----------------------------------------')
 # pprint(sell_results)
 
