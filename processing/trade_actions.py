@@ -3,9 +3,21 @@ import numpy as np
 
 class TradeActions:
     table = None
+    date_list: list = None
+    close_list: list = None
+    high_list: list = None
+    min_list: list = None
+    direction_list: list = None
+    ma3x3_week_list: list = None
 
     def __init__(self, table):
         self.table = table
+        self.date_list = table['date'].to_list()
+        self.close_list = table['close'].to_list()
+        self.high_list = table['high'].to_list()
+        self.min_list = table['min'].to_list()
+        self.direction_list = table['direction'].to_list()
+        self.ma3x3_week_list = table['ma_week_shift'].to_list()
 
     def early_enter_buy(self, day):
         if self.table['direction'][day] == 1 \
